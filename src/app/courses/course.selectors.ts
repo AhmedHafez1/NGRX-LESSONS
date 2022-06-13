@@ -42,3 +42,5 @@ export const selectLessonsPage = (courseId: number, page: PageQuery) =>
       .filter((lesson) => lesson.courseId === courseId)
       .slice(start, end);
   });
+
+  export const selectLessonsLoading = createSelector(selectLessonsState, lessonsState => lessonsState.loading);

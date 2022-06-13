@@ -6,10 +6,11 @@ import {
   CourseActionTypes,
   CourseLoaded,
   CourseRequested,
+  LessonsPageCancelled,
   LessonsPageLoaded,
   LessonsPageRequested,
 } from "./course.actions";
-import { throwError } from "rxjs";
+import { of, throwError } from "rxjs";
 import {
   catchError,
   concatMap,
@@ -56,11 +57,18 @@ export class CourseEffects {
   loadPageLessons$ = this.actions$.pipe(
     ofType<LessonsPageRequested>(CourseActionTypes.LessonsPageRequested),
     mergeMap((action) =>
-      this.coursesService.findLessons(
-        action.payload.courseId,
-        action.payload.page.pageIndex,
-        action.payload.page.pageSize
-      )
+      this.coursesService
+        .findLessons(
+          action.payload.courseId,
+          action.payload.page.pageIndex,
+          action.payload.page.pageSize
+        )
+        .pipe(
+          catchError((error) => {
+            this.store.dispatch(new LessonsPageCancelled());
+            return of([]);
+          })
+        )
     ),
     map((lessons) => {
       return new LessonsPageLoaded({ lessons });
